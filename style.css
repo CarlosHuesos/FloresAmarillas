@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #ff9cbd; /* Fondo rosa */
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.oculto {
+    display: none !important;
+}
+
+#btn-comenzar {
+    padding: 15px 30px;
+    font-size: 1.5rem;
+    border: none;
+    border-radius: 10px;
+    background-color: #fff;
+    color: #5c4033;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.tarjeta {
+    width: 800px;
+    height: 500px;
+    background-color: #faf0e6; /* Color crema */
+    border-radius: 20px;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    overflow: hidden;
+}
+
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#lienzoAnimacion { z-index: 1; } /* Árbol y copa estáticos */
+#lienzoParticulas { z-index: 2; pointer-events: none; } /* Partículas dinámicas */
+
+.textos {
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    width: 300px;
+    z-index: 3; /* Texto siempre arriba */
+    color: #5c4033;
+}
+
+h2 {
+    font-size: 1.2rem;
+    margin: 0 0 20px 0;
+    height: 25px;
+}
+
+#mensaje {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    height: 100px;
+}
+
+.tiempo-container {
+    position: absolute;
+    top: 330px;
+    width: 400px;
+}
+
+.tiempo-container p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+#cronometro {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.suelo {
+    position: absolute;
+    bottom: 60px;
+    width: 100%;
+    height: 4px;
+    background-color: #5c4033;
+    z-index: 1; /* Suelo estático */
+}
