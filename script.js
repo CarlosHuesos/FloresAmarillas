@@ -3,33 +3,45 @@ const pantallaInicio = document.getElementById('pantalla-inicio');
 const pantallaPrincipal = document.getElementById('pantalla-principal');
 const canvas = document.getElementById('lienzoAnimacion');
 const ctx = canvas.getContext('2d');
-
 const canvasParticulas = document.getElementById('lienzoParticulas');
 const ctxParticulas = canvasParticulas.getContext('2d');
-
-canvas.width = 800;
-canvas.height = 500;
-canvasParticulas.width = 800;
-canvasParticulas.height = 500;
 
 const txtTitulo = document.getElementById('titulo');
 const txtMensaje = document.getElementById('mensaje');
 const txtTextoTiempo = document.getElementById('texto-tiempo');
 const txtCronometro = document.getElementById('cronometro');
 
-// Fecha de inicio: 28 de Mayo de 2016
 const fechaInicio = new Date(2016, 4, 28, 0, 0, 0); 
 
-const centroX_Arbol = canvas.width - 250; 
-const sueloY = canvas.height - 60;
-const copaY = sueloY - 220; 
-
+let centroX_Arbol, sueloY, copaY;
 var particulasCaida = [];
 var floresSuelo = []; 
+
+function ajustarCanvas() {
+    const tarjeta = document.querySelector('.tarjeta');
+    canvas.width = tarjeta.clientWidth;
+    canvas.height = tarjeta.clientHeight;
+    canvasParticulas.width = tarjeta.clientWidth;
+    canvasParticulas.height = tarjeta.clientHeight;
+
+    // Cálculo estricto para que no se encimen en celular
+    if (canvas.width < 600) {
+        centroX_Arbol = canvas.width / 2; 
+        sueloY = canvas.height - 30; // Suelo más abajo
+        copaY = sueloY - (canvas.height * 0.32); // Copa en la mitad inferior
+    } else {
+        centroX_Arbol = canvas.width * 0.7; 
+        sueloY = canvas.height - 60;
+        copaY = sueloY - (canvas.height * 0.45); 
+    }
+}
+
+window.addEventListener('resize', ajustarCanvas);
 
 btnComenzar.addEventListener('click', () => {
     pantallaInicio.classList.add('oculto');
     pantallaPrincipal.classList.remove('oculto');
+    ajustarCanvas(); 
     animarSemilla();
 });
 
@@ -38,7 +50,6 @@ function dibujarGirasol(ctxToDraw, x, y, rPétalo, rCentro) {
     ctxToDraw.beginPath();
     ctxToDraw.arc(x, y, rPétalo, 0, Math.PI * 2);
     ctxToDraw.fill();
-
     ctxToDraw.fillStyle = '#8B4513'; 
     ctxToDraw.beginPath();
     ctxToDraw.arc(x, y, rCentro, 0, Math.PI * 2);
@@ -49,8 +60,8 @@ function ParticulaCaida(x, y) {
     this.x = x; 
     this.y = y;
     this.vx = (Math.random() - 0.5) * 1; 
-    this.vy = 0.5 + Math.random() * 0.8; // Caída lenta
-    let sizeRandom = 0.8 + Math.random() * 0.6; // Ligeramente más grandes
+    this.vy = 0.5 + Math.random() * 0.8; 
+    let sizeRandom = 0.8 + Math.random() * 0.6; 
     this.radioPétalo = 4 * sizeRandom;
     this.radioCentro = 2 * sizeRandom;
 }
@@ -90,21 +101,20 @@ function dibujarArbol() {
     let terminado = false;
 
     function crearRamas(x, y, longitud, angulo, grosor, nivel) {
-        // Reducido a 5 para evitar que salgan puntas largas fuera del corazón
         if (nivel > 5) return;
         ramas.push({x, y, longitud, angulo, grosor, nivel});
 
         let nuevoX = x + longitud * Math.cos(angulo);
         let nuevoY = y + longitud * Math.sin(angulo);
-
         let apertura = 0.35 + (nivel * 0.03);
 
-        // Multiplicador reducido de 0.75 a 0.60 para que las ramas sean más cortas y compactas
         crearRamas(nuevoX, nuevoY, longitud * 0.60, angulo - apertura, grosor * 0.7, nivel + 1);
         crearRamas(nuevoX, nuevoY, longitud * 0.60, angulo + apertura, grosor * 0.7, nivel + 1);
     }
 
-    crearRamas(centroX_Arbol, sueloY, 100, -Math.PI / 2, 10, 0);
+    // Tronco más pequeño en celular
+    let alturaTronco = canvas.width < 600 ? canvas.height * 0.12 : canvas.height * 0.2;
+    crearRamas(centroX_Arbol, sueloY, alturaTronco, -Math.PI / 2, 10, 0);
 
     function animarRamas() {
         let limite = Math.min(progreso + 1, ramas.length); 
@@ -131,11 +141,11 @@ function dibujarArbol() {
 }
 
 function dibujarCorazonLlenoAnimado(offsetX, offsetY) {
-    const escala = 10.5; 
+    // Escala menor en celulares para que quepa bien
+    const escala = canvas.width < 600 ? 5.5 : 10.5; 
     let girasolesDibujados = 0;
     const totalGirasoles = 3500; 
 
-    // Rellenar el suelo base antes de que caigan más
     for(let i = 0; i < 400; i++) {
         let x = Math.random() * canvas.width;
         let y = sueloY - Math.random() * 12; 
@@ -147,13 +157,12 @@ function dibujarCorazonLlenoAnimado(offsetX, offsetY) {
         for (let i = 0; i < 10; i++) { 
             if (girasolesDibujados >= totalGirasoles) {
                 iniciarTextos();
-                animarParticulasCaida(offsetX, offsetY); 
+                animarParticulasCaida(offsetX, offsetY, escala); 
                 return;
             }
 
             let t = Math.random() * Math.PI * 2;
             let r = Math.sqrt(Math.random()); 
-
             let hx = 16 * Math.pow(Math.sin(t), 3);
             let hy = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
 
@@ -169,7 +178,7 @@ function dibujarCorazonLlenoAnimado(offsetX, offsetY) {
     animar();
 }
 
-function animarParticulasCaida(offsetX, offsetY) {
+function animarParticulasCaida(offsetX, offsetY, escalaCopa) {
     ctxParticulas.clearRect(0, 0, canvasParticulas.width, canvasParticulas.height);
 
     if (Math.random() < 0.08) { 
@@ -178,8 +187,8 @@ function animarParticulasCaida(offsetX, offsetY) {
         let hx = 16 * Math.pow(Math.sin(t), 3);
         let hy = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
         
-        let startX = offsetX + (hx * 10.5 * r);
-        let startY = offsetY + (hy * 10.5 * r);
+        let startX = offsetX + (hx * escalaCopa * r);
+        let startY = offsetY + (hy * escalaCopa * r);
         particulasCaida.push(new ParticulaCaida(startX, startY));
     }
 
@@ -196,13 +205,12 @@ function animarParticulasCaida(offsetX, offsetY) {
         }
     }
 
-    requestAnimationFrame(function() { animarParticulasCaida(offsetX, offsetY); });
+    requestAnimationFrame(function() { animarParticulasCaida(offsetX, offsetY, escalaCopa); });
 }
 
 function iniciarTextos() {
     escribirTexto(txtTitulo, "Flores Amarillas", () => {
-        escribirTexto(txtMensaje, `para el amor de mi vida, mi musa:\n\nSi pudiera elegir un lugar seguro, sería a tu lado...
-            Te amo, te quiero y te deceo en todo momento mi querida melissa.`, () => {
+        escribirTexto(txtMensaje, `para el amor de mi vida, mi musa:\n\nSi pudiera elegir un lugar seguro, sería a tu lado...\nTe amo, te quiero y te deseo en todo momento mi querida Melissa.`, () => {
             txtTextoTiempo.innerText = "Mi amor por ti comenzó hace...";
             setInterval(actualizarCronometro, 1000);
             actualizarCronometro();
